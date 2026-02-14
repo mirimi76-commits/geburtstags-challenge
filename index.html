@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Geburtstags Challenge</title>
+<title>Begriffe Challenge</title>
 
 <style>
 body {
@@ -24,7 +24,7 @@ h1 { font-size: 28px; }
     min-height: 70px;
 }
 
-button, select {
+button, select, input {
     padding: 12px 20px;
     font-size: 16px;
     margin: 6px;
@@ -75,10 +75,13 @@ Zeit:
 <option value="30" selected>30 Sekunden</option>
 <option value="45">45 Sekunden</option>
 </select>
+
+Runden:
+<input type="number" id="roundInput" value="12" min="1" max="30">
 </div>
 
 <div id="timer">30</div>
-<div id="roundInfo">Runde 1 von 12</div>
+<div id="roundInfo">Runde 1</div>
 <div id="word">Team wählen & Start drücken</div>
 
 <button id="startBtn" onclick="startGame()">Start</button>
@@ -99,7 +102,25 @@ if ('wakeLock' in navigator) {
 }
 
 // Begriffe (keine Wiederholung)
-let words = ["Fußball","Einhorn","Pizza","Dinosaurier","Zauberer","Schatzkarte","Superheld","Roboter","Achterbahn","Geheimagent","Drache","Schokolade","Hai","Weltraum","Detektiv","Zirkus","Pirat","Ritter","Kino","Monster","Schule","Zoo","Feuerwehr","Schneemann","Geburtstag","Camping","Fernbedienung","Weltall","Tornado","Vulkan","Rakete","Alien","Prinzessin","Laptop","Handy","Gitarre","Berg","Meer","Insel","Wüste","Zebra","Elefant","Tiger","Löwe","Pinguin","Krokodil","Papagei","Fahrrad","Skateboard","Trampolin","U-Boot","Hexe","Magier","Zeitreise","Ninja","Polizei","Arzt","Pilot","Astronaut","Kapitän","Regenbogen","Blitz","Donner","Keks","Popcorn","Eis","Spaghetti","Hamburger","Zug","Flugzeug","Bus","Auto","Känguru","Koala","Fuchs","Igel","Waschbär","Geschenk","Geheimnis","Abenteuer","Puzzle","Kristall","Vampir","Wolf","Schloss","Burg","König","Held","Film","Game","Controller","Laser","Schwert","Schild","Kompass","Brücke","Tunnel","Turm","Riesenrad","Wasserfall","Bergsteiger","Rennwagen","Boxer","Skifahrer","Segelboot","Wikinger"];
+let words = [
+"Fußball","Einhorn","Pizza","Dinosaurier","Zauberer","Schatzkarte","Superheld",
+"Roboter","Achterbahn","Geheimagent","Drache","Schokolade","Hai","Weltraum",
+"Detektiv","Zirkus","Pirat","Ritter","Kino","Monster","Schule","Zoo",
+"Feuerwehr","Schneemann","Geburtstag","Camping","Fernbedienung","Weltall",
+"Tornado","Vulkan","Rakete","Alien","Prinzessin","Laptop","Handy",
+"Gitarre","Berg","Meer","Insel","Wüste","Zebra","Elefant","Tiger",
+"Löwe","Pinguin","Krokodil","Papagei","Fahrrad","Skateboard",
+"Trampolin","U-Boot","Hexe","Magier","Zeitreise","Ninja","Polizei",
+"Arzt","Pilot","Astronaut","Kapitän","Regenbogen","Blitz",
+"Donner","Keks","Popcorn","Eis","Spaghetti","Hamburger",
+"Zug","Flugzeug","Bus","Auto","Känguru","Koala","Fuchs",
+"Igel","Waschbär","Geschenk","Geheimnis","Abenteuer","Puzzle",
+"Kristall","Vampir","Wolf","Schloss","Burg","König",
+"Held","Film","Game","Controller","Laser","Schwert",
+"Schild","Kompass","Brücke","Tunnel","Turm","Riesenrad",
+"Wasserfall","Bergsteiger","Rennwagen","Boxer","Skifahrer",
+"Segelboot","Wikinger"
+];
 
 function shuffle(array){
 for(let i=array.length-1;i>0;i--){
@@ -121,10 +142,17 @@ let maxRounds=12;
 function setTeam(team){ currentTeam=team; }
 
 function startGame(){
-if(!currentTeam){ alert("Bitte zuerst Team wählen!"); return; }
+if(!currentTeam){
+alert("Bitte zuerst Team wählen!");
+return;
+}
 
+maxRounds=parseInt(document.getElementById("roundInput").value);
 timeLeft=parseInt(document.getElementById("timeSelect").value);
+
 document.getElementById("timer").textContent=timeLeft;
+document.getElementById("roundInfo").textContent="Runde "+round+" von "+maxRounds;
+
 nextWord();
 
 clearInterval(timer);
@@ -140,7 +168,10 @@ nextRound();
 }
 
 function nextWord(){
-if(index>=words.length){ showWinner(); return; }
+if(index>=words.length){
+showWinner();
+return;
+}
 document.getElementById("word").textContent=words[index];
 index++;
 }
@@ -161,7 +192,10 @@ document.getElementById("girlsScore").textContent=girlsScore;
 
 function nextRound(){
 round++;
-if(round>maxRounds){ showWinner(); return; }
+if(round>maxRounds){
+showWinner();
+return;
+}
 currentTeam=currentTeam==="boys"?"girls":"boys";
 document.getElementById("roundInfo").textContent="Runde "+round+" von "+maxRounds;
 document.getElementById("word").textContent="Teamwechsel!";
@@ -185,7 +219,6 @@ let audio=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg
 audio.play();
 }
 
-// 🎊 Konfetti
 function launchConfetti(){
 for(let i=0;i<100;i++){
 let conf=document.createElement("div");
