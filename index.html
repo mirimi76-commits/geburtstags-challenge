@@ -12,22 +12,51 @@ body {
     background: linear-gradient(135deg,#4facfe,#ff4e9b);
     color: white;
     padding: 20px;
+    overflow-x: hidden;
 }
+
 h1 { font-size: 28px; }
-#word { font-size: 32px; margin: 30px; font-weight: bold; min-height: 60px; }
-button {
-    padding: 15px 25px;
-    font-size: 18px;
-    margin: 10px;
-    border-radius: 15px;
+
+#word {
+    font-size: 34px;
+    margin: 30px;
+    font-weight: bold;
+    min-height: 70px;
+}
+
+button, select {
+    padding: 12px 20px;
+    font-size: 16px;
+    margin: 6px;
+    border-radius: 12px;
     border: none;
 }
+
 .teamBtn { background: white; color: black; }
 #startBtn { background: #00e676; }
 #correctBtn { background: #2979ff; color:white;}
 #nextBtn { background: #ff9100; }
-#timer { font-size: 50px; margin: 20px; }
+#resetBtn { background:#ff1744; color:white;}
+
+#timer {
+    font-size: 60px;
+    margin: 10px;
+}
+
 .score { font-size: 22px; margin-top: 20px; }
+#roundInfo { font-size: 18px; margin-top: 10px; }
+
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+    to { transform: translateY(100vh) rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -39,12 +68,23 @@ button {
 <button class="teamBtn" onclick="setTeam('girls')">Mädchen</button>
 </div>
 
+<div>
+Zeit:
+<select id="timeSelect">
+<option value="20">20 Sekunden</option>
+<option value="30" selected>30 Sekunden</option>
+<option value="45">45 Sekunden</option>
+</select>
+</div>
+
 <div id="timer">30</div>
+<div id="roundInfo">Runde 1 von 12</div>
 <div id="word">Team wählen & Start drücken</div>
 
 <button id="startBtn" onclick="startGame()">Start</button>
 <button id="correctBtn" onclick="correctAnswer()">Richtig ✅</button>
 <button id="nextBtn" onclick="nextWord()">Überspringen</button>
+<button id="resetBtn" onclick="resetGame()">Reset</button>
 
 <div class="score">
 Jungs: <span id="boysScore">0</span><br>
@@ -53,36 +93,13 @@ Mädchen: <span id="girlsScore">0</span>
 
 <script>
 
-let words = [
-"Fußball","Einhorn","Pizza","Dinosaurier","Zauberer","Schatzkarte","Superheld",
-"Roboter","Achterbahn","Geheimagent","Drache","Schokolade","Hai","Weltraum",
-"Detektiv","Zirkus","Pirat","Ritter","Kino","Monster","Schule","Zoo",
-"Feuerwehr","Schneemann","Geburtstag","Camping","Fernbedienung","Weltall",
-"Tornado","Schatz","Vulkan","Teleskop","Rakete","Alien","Prinzessin",
-"Gold","Computer","Laptop","Handy","Tablet","Kopfhörer","Mikrofon",
-"Gitarre","Schlagzeug","Klavier","Trompete","Berg","Meer","Insel",
-"Wüste","Dschungel","Safari","Zebra","Giraffe","Elefant","Tiger",
-"Löwe","Pinguin","Krokodil","Schildkröte","Papagei","Fahrrad",
-"Roller","Skateboard","Trampolin","Schwimmbad","Taucher","U-Boot",
-"Leuchtturm","Schneesturm","Lawine","Hexe","Magier","Unsichtbar",
-"Zeitreise","Schatztruhe","Ninja","Samurai","Polizei","Krankenwagen",
-"Arzt","Bäcker","Pilot","Astronaut","Kapitän","Lehrer","Reporter",
-"Koch","Zauberspruch","Wolke","Regenbogen","Blitz","Donner",
-"Sandburg","Schlitten","Keks","Popcorn","Eis","Spaghetti",
-"Hamburger","Pommes","Zug","Flugzeug","Bus","Auto",
-"Hubschrauber","Känguru","Koala","Faultier","Chamäleon","Fuchs",
-"Igel","Biber","Waschbär","Murmel","Ballon","Geschenk",
-"Geheimnis","Abenteuer","Expedition","Schatzinsel","Rätsel",
-"Puzzle","Zauberstab","Kristall","Höhle","Vampir",
-"Wolf","Eisscholle","Schloss","Burg","Thron",
-"König","Königin","Held","Comic","Film",
-"Serie","YouTuber","Game","Controller",
-"Level","Highscore","Laser","Schwert","Schild",
-"Bumerang","Kompass","Karte","Brücke","Tunnel",
-"Turm","Riesenrad","Karussell","Wasserfall","Bergsteiger",
-"Kletterwand","Schatzjäger","Rennwagen","Boxer","Turner",
-"Skifahrer","Snowboard","Segelboot","Kanu","Wikinger"
-];
+// Bildschirm wach halten
+if ('wakeLock' in navigator) {
+    navigator.wakeLock.request('screen').catch(()=>{});
+}
+
+// Begriffe (keine Wiederholung)
+let words = ["Fußball","Einhorn","Pizza","Dinosaurier","Zauberer","Schatzkarte","Superheld","Roboter","Achterbahn","Geheimagent","Drache","Schokolade","Hai","Weltraum","Detektiv","Zirkus","Pirat","Ritter","Kino","Monster","Schule","Zoo","Feuerwehr","Schneemann","Geburtstag","Camping","Fernbedienung","Weltall","Tornado","Vulkan","Rakete","Alien","Prinzessin","Laptop","Handy","Gitarre","Berg","Meer","Insel","Wüste","Zebra","Elefant","Tiger","Löwe","Pinguin","Krokodil","Papagei","Fahrrad","Skateboard","Trampolin","U-Boot","Hexe","Magier","Zeitreise","Ninja","Polizei","Arzt","Pilot","Astronaut","Kapitän","Regenbogen","Blitz","Donner","Keks","Popcorn","Eis","Spaghetti","Hamburger","Zug","Flugzeug","Bus","Auto","Känguru","Koala","Fuchs","Igel","Waschbär","Geschenk","Geheimnis","Abenteuer","Puzzle","Kristall","Vampir","Wolf","Schloss","Burg","König","Held","Film","Game","Controller","Laser","Schwert","Schild","Kompass","Brücke","Tunnel","Turm","Riesenrad","Wasserfall","Bergsteiger","Rennwagen","Boxer","Skifahrer","Segelboot","Wikinger"];
 
 function shuffle(array){
 for(let i=array.length-1;i>0;i--){
@@ -98,22 +115,26 @@ let boysScore=0;
 let girlsScore=0;
 let timeLeft=30;
 let timer;
+let round=1;
+let maxRounds=12;
 
 function setTeam(team){ currentTeam=team; }
 
 function startGame(){
-if(!currentTeam){ alert("Bitte zuerst ein Team auswählen!"); return; }
-timeLeft=30;
+if(!currentTeam){ alert("Bitte zuerst Team wählen!"); return; }
+
+timeLeft=parseInt(document.getElementById("timeSelect").value);
 document.getElementById("timer").textContent=timeLeft;
 nextWord();
+
 clearInterval(timer);
 timer=setInterval(function(){
 timeLeft--;
 document.getElementById("timer").textContent=timeLeft;
 if(timeLeft<=0){
 clearInterval(timer);
-document.getElementById("word").textContent="Zeit vorbei!";
-switchTeam();
+beep();
+nextRound();
 }
 },1000);
 }
@@ -126,23 +147,54 @@ index++;
 
 function correctAnswer(){
 if(timeLeft>0){
-if(currentTeam==="boys"){ boysScore++; document.getElementById("boysScore").textContent=boysScore; }
-else{ girlsScore++; document.getElementById("girlsScore").textContent=girlsScore; }
+if(currentTeam==="boys"){ boysScore++; }
+else{ girlsScore++; }
+updateScores();
 nextWord();
 }
 }
 
-function switchTeam(){
+function updateScores(){
+document.getElementById("boysScore").textContent=boysScore;
+document.getElementById("girlsScore").textContent=girlsScore;
+}
+
+function nextRound(){
+round++;
+if(round>maxRounds){ showWinner(); return; }
 currentTeam=currentTeam==="boys"?"girls":"boys";
-alert("Teamwechsel!");
+document.getElementById("roundInfo").textContent="Runde "+round+" von "+maxRounds;
+document.getElementById("word").textContent="Teamwechsel!";
 }
 
 function showWinner(){
 let winner="";
-if(boysScore>girlsScore){winner="Jungs gewinnen! 🏆";}
-else if(girlsScore>boysScore){winner="Mädchen gewinnen! 🏆";}
-else{winner="Unentschieden!";}
+if(boysScore>girlsScore){winner="🏆 Jungs gewinnen!";}
+else if(girlsScore>boysScore){winner="🏆 Mädchen gewinnen!";}
+else{winner="🤝 Unentschieden!";}
 document.getElementById("word").textContent=winner;
+launchConfetti();
+}
+
+function resetGame(){
+location.reload();
+}
+
+function beep(){
+let audio=new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg");
+audio.play();
+}
+
+// 🎊 Konfetti
+function launchConfetti(){
+for(let i=0;i<100;i++){
+let conf=document.createElement("div");
+conf.classList.add("confetti");
+conf.style.left=Math.random()*100+"vw";
+conf.style.backgroundColor="hsl("+Math.random()*360+",100%,50%)";
+document.body.appendChild(conf);
+setTimeout(()=>conf.remove(),3000);
+}
 }
 
 </script>
