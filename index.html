@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geburtstags Challenge</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background: linear-gradient(135deg,#4facfe,#ff4e9b);
+    color: white;
+    padding: 20px;
+}
+h1 { font-size: 28px; }
+#word { font-size: 32px; margin: 30px; font-weight: bold; min-height: 60px; }
+button {
+    padding: 15px 25px;
+    font-size: 18px;
+    margin: 10px;
+    border-radius: 15px;
+    border: none;
+}
+.teamBtn { background: white; color: black; }
+#startBtn { background: #00e676; }
+#correctBtn { background: #2979ff; color:white;}
+#nextBtn { background: #ff9100; }
+#timer { font-size: 50px; margin: 20px; }
+.score { font-size: 22px; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>Begriffe Challenge 🎉</h1>
+
+<div>
+<button class="teamBtn" onclick="setTeam('boys')">Jungs</button>
+<button class="teamBtn" onclick="setTeam('girls')">Mädchen</button>
+</div>
+
+<div id="timer">30</div>
+<div id="word">Team wählen & Start drücken</div>
+
+<button id="startBtn" onclick="startGame()">Start</button>
+<button id="correctBtn" onclick="correctAnswer()">Richtig ✅</button>
+<button id="nextBtn" onclick="nextWord()">Überspringen</button>
+
+<div class="score">
+Jungs: <span id="boysScore">0</span><br>
+Mädchen: <span id="girlsScore">0</span>
+</div>
+
+<script>
+
+let words = [
+"Fußball","Einhorn","Pizza","Dinosaurier","Zauberer","Schatzkarte","Superheld",
+"Roboter","Achterbahn","Geheimagent","Drache","Schokolade","Hai","Weltraum",
+"Detektiv","Zirkus","Pirat","Ritter","Kino","Monster","Schule","Zoo",
+"Feuerwehr","Schneemann","Geburtstag","Camping","Fernbedienung","Weltall",
+"Tornado","Schatz","Vulkan","Teleskop","Rakete","Alien","Prinzessin",
+"Gold","Computer","Laptop","Handy","Tablet","Kopfhörer","Mikrofon",
+"Gitarre","Schlagzeug","Klavier","Trompete","Berg","Meer","Insel",
+"Wüste","Dschungel","Safari","Zebra","Giraffe","Elefant","Tiger",
+"Löwe","Pinguin","Krokodil","Schildkröte","Papagei","Fahrrad",
+"Roller","Skateboard","Trampolin","Schwimmbad","Taucher","U-Boot",
+"Leuchtturm","Schneesturm","Lawine","Hexe","Magier","Unsichtbar",
+"Zeitreise","Schatztruhe","Ninja","Samurai","Polizei","Krankenwagen",
+"Arzt","Bäcker","Pilot","Astronaut","Kapitän","Lehrer","Reporter",
+"Koch","Zauberspruch","Wolke","Regenbogen","Blitz","Donner",
+"Sandburg","Schlitten","Keks","Popcorn","Eis","Spaghetti",
+"Hamburger","Pommes","Zug","Flugzeug","Bus","Auto",
+"Hubschrauber","Känguru","Koala","Faultier","Chamäleon","Fuchs",
+"Igel","Biber","Waschbär","Murmel","Ballon","Geschenk",
+"Geheimnis","Abenteuer","Expedition","Schatzinsel","Rätsel",
+"Puzzle","Zauberstab","Kristall","Höhle","Vampir",
+"Wolf","Eisscholle","Schloss","Burg","Thron",
+"König","Königin","Held","Comic","Film",
+"Serie","YouTuber","Game","Controller",
+"Level","Highscore","Laser","Schwert","Schild",
+"Bumerang","Kompass","Karte","Brücke","Tunnel",
+"Turm","Riesenrad","Karussell","Wasserfall","Bergsteiger",
+"Kletterwand","Schatzjäger","Rennwagen","Boxer","Turner",
+"Skifahrer","Snowboard","Segelboot","Kanu","Wikinger"
+];
+
+function shuffle(array){
+for(let i=array.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[array[i],array[j]]=[array[j],array[i]];
+}
+}
+shuffle(words);
+
+let index=0;
+let currentTeam="";
+let boysScore=0;
+let girlsScore=0;
+let timeLeft=30;
+let timer;
+
+function setTeam(team){ currentTeam=team; }
+
+function startGame(){
+if(!currentTeam){ alert("Bitte zuerst ein Team auswählen!"); return; }
+timeLeft=30;
+document.getElementById("timer").textContent=timeLeft;
+nextWord();
+clearInterval(timer);
+timer=setInterval(function(){
+timeLeft--;
+document.getElementById("timer").textContent=timeLeft;
+if(timeLeft<=0){
+clearInterval(timer);
+document.getElementById("word").textContent="Zeit vorbei!";
+switchTeam();
+}
+},1000);
+}
+
+function nextWord(){
+if(index>=words.length){ showWinner(); return; }
+document.getElementById("word").textContent=words[index];
+index++;
+}
+
+function correctAnswer(){
+if(timeLeft>0){
+if(currentTeam==="boys"){ boysScore++; document.getElementById("boysScore").textContent=boysScore; }
+else{ girlsScore++; document.getElementById("girlsScore").textContent=girlsScore; }
+nextWord();
+}
+}
+
+function switchTeam(){
+currentTeam=currentTeam==="boys"?"girls":"boys";
+alert("Teamwechsel!");
+}
+
+function showWinner(){
+let winner="";
+if(boysScore>girlsScore){winner="Jungs gewinnen! 🏆";}
+else if(girlsScore>boysScore){winner="Mädchen gewinnen! 🏆";}
+else{winner="Unentschieden!";}
+document.getElementById("word").textContent=winner;
+}
+
+</script>
+</body>
+</html>
